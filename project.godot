@@ -19,6 +19,15 @@ config/name="Project-omega"
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/size/width=1920
+window/size/height=1080
+window/size/resizable=false
+window/size/fullscreen=true
+window/vsync/use_vsync=false
+window/stretch/aspect="keep"
+
 [input]
 
 move_up={

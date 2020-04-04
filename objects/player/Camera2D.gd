@@ -8,7 +8,7 @@ var transition_time = 0.1
 
 func _ready():
 	current_zoom = zoom.x
-	max_zoom = 0.60
+	max_zoom = 0.40 # temp - normal is 0.60
 	min_zoom = zoom.x * 0.40
 	
 func _input(event):
@@ -17,6 +17,9 @@ func _input(event):
 			zoom_in()
 		if event.button_index == BUTTON_WHEEL_DOWN:
 			zoom_out()
+	elif event is InputEventKey:
+		if event.is_action_pressed("ui_cancel"):
+			get_tree().quit()
 			
 func zoom_in():
 	var target_zoom = current_zoom * zoom_delta
