@@ -35,11 +35,11 @@ func _ready():
 		for j in range(-world_size.y, world_size.y+1):
 			current_column.append(createTile(i, j))
 		tiles.append(current_column)
-	current_pos = Vector2(int(player.get_position().x), int(player.get_position().y))
+	current_pos = Vector2(int(player.get_position().x)/size, int(player.get_position().y)/size)
 
 func _process(_delta):
-	var pos = Vector2(int(player.get_position().x), int(player.get_position().y))
-	if pos.x > current_pos.x + size: # Moving right
+	var pos = Vector2(int(player.get_position().x)/size, int(player.get_position().y)/size)
+	if pos.x > current_pos.x: # Moving right
 		current_pos.x = pos.x
 		
 		for t in tiles.pop_front():
@@ -47,11 +47,11 @@ func _process(_delta):
 			
 		var new_tiles = []
 		var new_x = tiles.back()[0].position.x/size + 1
-		for j in range(-world_size.y, world_size.y + 1):
+		for j in range(tiles[0].front().position.y/size, tiles[0].back().position.y/size + 1):
 			new_tiles.append(createTile(new_x, j))
 			
 		tiles.append(new_tiles)
-	if pos.x < current_pos.x - size: # Moving left
+	if pos.x < current_pos.x: # Moving left
 		current_pos.x = pos.x
 		
 		for t in tiles.pop_back():
@@ -59,11 +59,11 @@ func _process(_delta):
 			
 		var new_tiles = []
 		var new_x = tiles.front()[0].position.x/size - 1
-		for j in range(-world_size.y, world_size.y + 1):
+		for j in range(tiles[0].front().position.y/size, tiles[0].back().position.y/size + 1):
 			new_tiles.append(createTile(new_x, j))
 			
 		tiles.push_front(new_tiles)
-	if pos.y > current_pos.y + size: # Moving down
+	if pos.y > current_pos.y: # Moving down
 		current_pos.y = pos.y
 		
 		for c in tiles:
@@ -71,12 +71,12 @@ func _process(_delta):
 			
 		var new_tiles = []
 		var new_y = tiles[0].back().position.y/size + 1
-		for i in range(-world_size.x, world_size.x + 1):
+		for i in range(tiles.front()[0].position.x/size, tiles.back()[0].position.x/size + 1):
 			new_tiles.append(createTile(i, new_y))
 			
 		for j in range(new_tiles.size()):
 			tiles[j].push_back(new_tiles[j])
-	if pos.y < current_pos.y - size: # Moving up
+	if pos.y < current_pos.y: # Moving up
 		current_pos.y = pos.y
 		
 		for c in tiles:
@@ -84,7 +84,7 @@ func _process(_delta):
 			
 		var new_tiles = []
 		var new_y = tiles[0].front().position.y/size - 1
-		for i in range(-world_size.x, world_size.x + 1):
+		for i in range(tiles.front()[0].position.x/size, tiles.back()[0].position.x/size + 1):
 			new_tiles.append(createTile(i, new_y))
 			
 		for j in range(new_tiles.size()):
