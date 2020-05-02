@@ -4,9 +4,10 @@ var scl = 4
 var size = 16
 const TILE_SCENE = preload("res://test/Tile.tscn")
 onready var player = get_node("../../player")
-var world_size = Vector2(8, 4) # use 20, 12
+var world_size = Vector2(20, 12)
 var terrain = {}
 var tiles = []
+var start_pos
 var current_pos
 
 var noise = OpenSimplexNoise.new()
@@ -28,7 +29,7 @@ func _ready():
 	noise.seed = randi()
 	noise.lacunarity = 2.0 # difference in period between octaves
 	noise.octaves = 4 # number of passes (noise layers) sampled to get fractal noise (Max 9)
-	noise.period = 18.0 # lower period = higher-frequency noise (more change across same distance)
+	noise.period = 20.0 # lower period = higher-frequency noise (more change across same distance)
 	noise.persistence = 0.4 # contribution factor of subsequent octaves
 	for i in range(-world_size.x, world_size.x+1):
 		var current_column = []
@@ -36,6 +37,26 @@ func _ready():
 			current_column.append(createTile(i, j))
 		tiles.append(current_column)
 	current_pos = Vector2(int(player.get_position().x)/size, int(player.get_position().y)/size)
+	start_pos = current_pos
+
+func _input(event):
+	if event.is_action_pressed("reseed"):
+		reseed()
+		
+func reseed():
+	noise.seed = randi()
+	var new_tiles = []
+	var pos = Vector2(int(player.get_position().x)/size, int(player.get_position().y)/size)
+	for i in range(-world_size.x, world_size.x+1):
+		var current_column = []
+		for j in range(-world_size.y, world_size.y+1):
+			current_column.append(createTile(i + (current_pos.x - start_pos.x), j + (current_pos.y - start_pos.y)))
+		new_tiles.append(current_column)
+	for t_column in tiles:
+		for t in t_column:
+			t.queue_free()
+	tiles.clear()
+	tiles = new_tiles
 
 func _process(_delta):
 	var pos = Vector2(int(player.get_position().x)/size, int(player.get_position().y)/size)
