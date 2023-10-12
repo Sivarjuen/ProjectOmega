@@ -4,14 +4,13 @@ class_name Belt
 var belt_type: Types.Belt_Type = Types.Belt_Type.STRAIGHT
 var input: Array[Types.Direction] = [Types.Direction.DOWN]
 var output: Array[Types.Direction] = [Types.Direction.UP]
-var is_flipped = false
 var animation_set = false
 var ref_belt: AnimatedSprite2D
 
 
 func set_type(type: Types.Belt_Type, rotation: int, flipped: bool, ref: AnimatedSprite2D):
 	belt_type = type
-	is_flipped = flipped
+	set_flip_h(flipped)
 	rotate_belt(rotation)
 	animation_set = false
 	ref_belt = ref
@@ -30,36 +29,9 @@ func rotate_belt(value: int):
 		return
 		
 	rotation_degrees = value
+	var is_flipped = is_flipped_h()
 	
 	match belt_type:
-		Types.Belt_Type.START:
-			match rotation_value:
-				0:
-					input = []
-					output = [Types.Direction.UP]
-				90:
-					input = []
-					output = [Types.Direction.RIGHT]
-				180:
-					input = []
-					output = [Types.Direction.DOWN]
-				270:
-					input = []
-					output = [Types.Direction.LEFT]
-		Types.Belt_Type.END:
-			match rotation_value:
-				0:
-					input = [Types.Direction.DOWN]
-					output = []
-				90:
-					input = [Types.Direction.LEFT]
-					output = []
-				180:
-					input = [Types.Direction.UP]
-					output = []
-				270:
-					input = [Types.Direction.RIGHT]
-					output = []
 		Types.Belt_Type.STRAIGHT:
 			match rotation_value:
 				0:
@@ -107,10 +79,6 @@ func update_animation():
 			animation = "straight"
 		Types.Belt_Type.CORNER:
 			animation = "corner"
-		Types.Belt_Type.START:
-			animation = "start"
-		Types.Belt_Type.END:
-			animation = "end"
 
 func check_animation():
 	match belt_type:
@@ -118,10 +86,6 @@ func check_animation():
 			return animation == "straight"
 		Types.Belt_Type.CORNER:
 			return animation == "corner"
-		Types.Belt_Type.START:
-			return animation == "start"
-		Types.Belt_Type.END:
-			return animation == "end"
 	return false
 
 func update_frame():
