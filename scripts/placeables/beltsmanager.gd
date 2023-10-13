@@ -3,23 +3,170 @@ extends Node2D
 @onready var belt_scn = preload("res://scenes/belts/belt.tscn")
 @onready var player = get_node("../../player")
 @onready var ref = get_node("../../ref_belt")
+var highlight
+var highlight_belts = []
+var highlight_cells = []
+var highlight_start_cell = null
+var highlight_end_cell = null
+var highlight_initial_dir = null
 
 var tile_size = 16
 var rot = 0
 var tiles = {}
 
+var last_cell = Vector2(-9999,9999)
 
+func _ready():
+	highlight = create_highlight_belt()
+	
+func create_highlight_belt() -> Belt:
+	var highlight_belt = belt_scn.instantiate()
+	highlight_belt.modulate = Color(0.31, 1.00, 0.44, 1)
+	highlight_belt.set_type(Types.Belt_Type.STRAIGHT, 0, false, ref)
+	highlight_belt.z_index = 1
+	add_child(highlight_belt)
+	return highlight_belt
+	
 func _process(delta):
 	var cell = get_hovered_cell()
+	if cell != last_cell:
+		place_belt(cell, true)
+	last_cell = cell
 
 	if Input.is_action_just_pressed("rotate"):
 		rot += 90
 		if rot >= 360:
 			rot = 0
-		ref.rotation_degrees = rot
+		highlight.rotation_degrees = rot
+		place_belt(cell, true)
 
+	if Input.is_action_just_released("place"):
+#		place_belt(cell, false)
+		highlight.visible = true
+		highlight_start_cell = null
+		highlight_initial_dir = null
+		for belt in highlight_belts:
+			belt.queue_free()
+		highlight_belts = []
+		highlight_cells = []
+		
+	if Input.is_action_just_released("cancel"):
+		highlight.visible = true
+		highlight_start_cell = null
+		highlight_initial_dir = null
+		for belt in highlight_belts:
+			belt.queue_free()
+		highlight_belts = []
+		highlight_cells = []
+		
 	if Input.is_action_just_pressed("place"):
-		place_belt(cell)
+		highlight_start_cell = cell
+		highlight_initial_dir = null
+		highlight.visible = false
+		
+	if Input.is_action_pressed("place") and highlight_start_cell != null:
+		if cell != highlight_end_cell:
+			highlight_end_cell = cell
+			for belt in highlight_belts:
+				belt.queue_free()
+			highlight_belts = []
+			highlight_cells = []
+			
+			if cell != highlight_start_cell:
+				if highlight_initial_dir == null:
+					if cell.x > highlight_start_cell.x:
+						highlight_initial_dir = Types.Direction.RIGHT
+					elif cell.x < highlight_start_cell.x:
+						highlight_initial_dir = Types.Direction.LEFT
+					elif cell.y > highlight_start_cell.y:
+						highlight_initial_dir = Types.Direction.DOWN
+					elif cell.y < highlight_start_cell.y:
+						highlight_initial_dir = Types.Direction.UP
+				
+				if highlight_initial_dir != null:
+					match highlight_initial_dir:
+						Types.Direction.RIGHT:
+							if cell.x < highlight_start_cell.x:
+								highlight_initial_dir = Types.Direction.LEFT
+						Types.Direction.LEFT:
+							if cell.x > highlight_start_cell.x:
+								highlight_initial_dir = Types.Direction.RIGHT
+						Types.Direction.DOWN:
+							if cell.y < highlight_start_cell.y:
+								highlight_initial_dir = Types.Direction.UP
+						Types.Direction.UP:
+							if cell.y > highlight_start_cell.y:
+								highlight_initial_dir = Types.Direction.DOWN
+					match highlight_initial_dir:
+						Types.Direction.RIGHT:
+							for i in range(highlight_start_cell.x, cell.x + 1, 16):
+								highlight_cells.append(Vector2(i, highlight_start_cell.y))
+						Types.Direction.LEFT:
+							for i in range(highlight_start_cell.x, cell.x - 1, -16):
+								highlight_cells.append(Vector2(i, highlight_start_cell.y))
+						Types.Direction.DOWN:
+							for i in range(highlight_start_cell.y, cell.y + 1, 16):
+								highlight_cells.append(Vector2(highlight_start_cell.x, i))
+						Types.Direction.UP:
+							for i in range(highlight_start_cell.y, cell.y - 1, -16):
+								highlight_cells.append(Vector2(highlight_start_cell.x, i))
+					
+					if highlight_cells.size() > 0:
+						var corner_cell = highlight_cells[-1]
+						var corner_direction = null
+						var turning_index = highlight_cells.size() - 1
+						
+						if cell.x > corner_cell.x:
+							corner_direction = Types.Direction.RIGHT
+							for i in range(corner_cell.x + 16, cell.x + 1, 16):
+									highlight_cells.append(Vector2(i, corner_cell.y))
+						elif cell.x < corner_cell.x:
+							corner_direction = Types.Direction.LEFT
+							for i in range(corner_cell.x - 16, cell.x - 1, -16):
+									highlight_cells.append(Vector2(i, corner_cell.y))
+						elif cell.y > corner_cell.y:
+							corner_direction = Types.Direction.DOWN
+							for i in range(corner_cell.y + 16, cell.y + 1, 16):
+									highlight_cells.append(Vector2(corner_cell.x, i))
+						elif cell.y < corner_cell.y:
+							corner_direction = Types.Direction.UP
+							for i in range(corner_cell.y - 16, cell.y - 1, -16):
+									highlight_cells.append(Vector2(corner_cell.x, i))
+						
+						for i in range(highlight_cells.size()):
+							var current_highlight = create_highlight_belt();
+							var match_dir = 0
+							if i <= turning_index:
+								match_dir = highlight_initial_dir
+							else:
+								match_dir = corner_direction
+							var angle = 0
+							match match_dir:
+								Types.Direction.RIGHT:
+									angle = 90
+								Types.Direction.DOWN:
+									angle = 180
+								Types.Direction.LEFT:
+									angle = 270
+									
+							var highlight_belt_type = Types.Belt_Type.STRAIGHT
+							var highlight_flipped = false
+							if i == turning_index and i != highlight_cells.size()-1:
+								highlight_belt_type = Types.Belt_Type.CORNER
+								if ((highlight_initial_dir == Types.Direction.UP and corner_direction == Types.Direction.LEFT) 
+									or (highlight_initial_dir == Types.Direction.RIGHT and corner_direction == Types.Direction.UP)
+									or (highlight_initial_dir == Types.Direction.DOWN and corner_direction == Types.Direction.RIGHT) 
+									or (highlight_initial_dir == Types.Direction.LEFT and corner_direction == Types.Direction.DOWN)):
+										highlight_flipped = true
+							current_highlight.set_type(highlight_belt_type, angle, highlight_flipped, ref)
+							current_highlight.position = highlight_cells[i]
+							highlight_belts.append(current_highlight)
+			else:
+				highlight_cells.append(highlight_start_cell)
+				var current_highlight = create_highlight_belt();
+				current_highlight.set_type(Types.Belt_Type.STRAIGHT, rot, false, ref)
+				current_highlight.position = cell
+				highlight_belts.append(current_highlight)
 
 func get_hovered_cell() -> Vector2:
 	var m_pos = get_global_mouse_position()
@@ -27,10 +174,10 @@ func get_hovered_cell() -> Vector2:
 	var cell_y = snappedi(m_pos.y, tile_size)
 
 	var highlighted = Vector2(cell_x, cell_y)
-	ref.position = highlighted
+	highlight.position = highlighted
 	return highlighted
 
-func place_belt(cell: Vector2):
+func place_belt(cell: Vector2, highlight_only: bool):
 	var map_x = cell.x / tile_size
 	var map_y = cell.y / tile_size
 
@@ -83,16 +230,6 @@ func place_belt(cell: Vector2):
 	var belt_flipped = false
 	var belt_rot = rot
 
-	if !top:
-		if adj_right:
-			var right_belt = belts[adj_right_dir]
-			if right_belt.input.has(get_opposite_dir(adj_right_dir)):
-				belt_type = Types.Belt_Type.CORNER
-		elif adj_left:
-			var left_belt = belts[adj_left_dir]
-			if left_belt.input.has(get_opposite_dir(adj_left_dir)):
-				belt_type = Types.Belt_Type.CORNER
-				belt_flipped = true
 	if !base or !belts[base_dir].output.has(get_opposite_dir(base_dir)):
 		if adj_right:
 			var right_belt = belts[adj_right_dir]
@@ -106,16 +243,19 @@ func place_belt(cell: Vector2):
 				belt_flipped = true
 				belt_rot = rotate_cw(belt_rot)
 
-	var belt = create_belt(cell, belt_type, belt_flipped, ref, belt_rot)
+	if highlight_only:
+		highlight.set_type(belt_type, belt_rot, belt_flipped, ref)
+	else:
+		var belt = create_belt(cell, belt_type, belt_flipped, ref, belt_rot)
 
-	if !tiles.has(map_x):
-		tiles[map_x] = {}
+		if !tiles.has(map_x):
+			tiles[map_x] = {}
 
-	if tiles[map_x].has(map_y):
-		var old_belt = tiles[map_x][map_y]
-		old_belt.queue_free()
-	tiles[map_x][map_y] = belt
-	# Update surrounding belts that need updating
+		if tiles[map_x].has(map_y):
+			var old_belt = tiles[map_x][map_y]
+			old_belt.queue_free()
+		tiles[map_x][map_y] = belt
+		# Update surrounding belts that need updating
 
 func get_surrounding_belts(cell: Vector2) -> Dictionary:
 	var belts = {}

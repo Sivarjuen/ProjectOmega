@@ -1,0 +1,84 @@
+{
+	"categories": [
+		{
+			"uuid": "b3cbcc41-9157-44b9-af93-b24f69864ea0",
+			"title": "Task",
+			"color": "70bafa"
+		},
+		{
+			"uuid": "48e4c794-1723-4c48-ae9b-6a53ac38db89",
+			"title": "Belts",
+			"color": "c57725"
+		},
+		{
+			"uuid": "4f5c0caf-f14b-4263-b0c7-09c50f94e191",
+			"title": "Bug",
+			"color": "e21616"
+		}
+	],
+	"stages": [
+		{
+			"uuid": "b4b175bc-5d53-4748-8d35-330677c06ce7",
+			"title": "In progress",
+			"tasks": [
+				"d78be565-45c3-4f9d-9749-f4a0bad2219c",
+				"504dd420-5820-4574-8124-ef0b3971e7d9",
+				"5ca18ff4-93ff-4c7a-93c0-e7163448ffbe",
+				"9a60924b-8e13-4fda-9f38-3cd23727673e",
+				"46f36fbf-57cd-4c05-b122-d10801accec8"
+			]
+		},
+		{
+			"uuid": "5fdaaf89-02b3-41b1-ade9-29964eb670f1",
+			"title": "Backlog",
+			"tasks": []
+		}
+	],
+	"tasks": [
+		{
+			"uuid": "d78be565-45c3-4f9d-9749-f4a0bad2219c",
+			"title": "Place belts on highlighted cells",
+			"description": "",
+			"category": "48e4c794-1723-4c48-ae9b-6a53ac38db89",
+			"steps": []
+		},
+		{
+			"uuid": "504dd420-5820-4574-8124-ef0b3971e7d9",
+			"title": "Update surrounding belts (corners)",
+			"description": "",
+			"category": "48e4c794-1723-4c48-ae9b-6a53ac38db89",
+			"steps": []
+		},
+		{
+			"uuid": "5ca18ff4-93ff-4c7a-93c0-e7163448ffbe",
+			"title": "Implement T belts",
+			"description": "",
+			"category": "48e4c794-1723-4c48-ae9b-6a53ac38db89",
+			"steps": []
+		},
+		{
+			"uuid": "46f36fbf-57cd-4c05-b122-d10801accec8",
+			"title": "Implement 2 T belts",
+			"description": "",
+			"category": "48e4c794-1723-4c48-ae9b-6a53ac38db89",
+			"steps": []
+		},
+		{
+			"uuid": "9a60924b-8e13-4fda-9f38-3cd23727673e",
+			"title": "Implement end-T belts",
+			"description": "",
+			"category": "48e4c794-1723-4c48-ae9b-6a53ac38db89",
+			"steps": []
+		}
+	],
+	"layout": {
+		"columns": [
+			[
+				"b4b175bc-5d53-4748-8d35-330677c06ce7"
+			],
+			[
+				"5fdaaf89-02b3-41b1-ade9-29964eb670f1"
+			]
+		]
+	}
+}

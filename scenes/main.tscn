@@ -392,6 +392,14 @@ script = ExtResource("1_8a7m6")
 script = ExtResource("7_ojeor")
 
 [node name="ref_belt" parent="." instance=ExtResource("5_7660w")]
+visible = false
+modulate = Color(0.313726, 1, 0.443137, 1)
+animation = &"straight"
+frame = 0
+frame_progress = 0.0
+
+[node name="highlight_belt" parent="." instance=ExtResource("5_7660w")]
+visible = false
 modulate = Color(0.313726, 1, 0.443137, 1)
 animation = &"straight"
 frame = 0
